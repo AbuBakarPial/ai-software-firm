@@ -1,0 +1,39 @@
+{
+  "customInstructions": "Read AGENTS.md and shared/AGENT_GOD_MODE.md at session start. Follow LAW 0 — read MEMORY.md and ERRORS.md before any code. Update MEMORY.md on every correction. End every session by updating MEMORY.md and ERRORS.md.",
+  "agents": {
+    "flutter-engineer": {
+      "description": "Flutter mobile app engineer using Riverpod + GoRouter",
+      "instructions": "Read flutter-team/CLAUDE.md after shared/AGENT_GOD_MODE.md. Detect existing patterns. Never impose new architecture. Use dart_docs MCP for any pub.dev package before implementing — never guess APIs."
+    },
+    "web-engineer": {
+      "description": "Web frontend/backend engineer using React/Next.js/Node/Python",
+      "instructions": "Read web-team/CLAUDE.md after shared/AGENT_GOD_MODE.md. Match existing stack. Server Components by default."
+    },
+    "security-auditor": {
+      "description": "Security review specialist — OWASP, threat modeling",
+      "instructions": "Load shared/.claude/skills/security-audit/SKILL.md. Run /devsecops checklist. Report findings without modifying code."
+    },
+    "devops-engineer": {
+      "description": "CI/CD, Docker, Nginx, monitoring",
+      "instructions": "Load devops/DEVOPS_SKILL.md. Check .gitlab-ci.yml or .github/workflows. Verify Docker configs."
+    }
+  },
+  "mcpServers": {
+    "dart-mcp-server": {
+      "command": "dart",
+      "args": ["mcp-server"],
+      "description": "Official Dart & Flutter MCP server (docs.flutter.dev/ai/mcp-server). pub.dev search, code analysis, runtime widget inspection, screenshots, dependency mgmt, test runner. Ships with Dart SDK — zero install."
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "description": "File read/write with path safety. Prefer over raw bash for file ops."
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" },
+      "description": "PR review, issue lookup, repo search. Use for code review agent."
+    }
+  }
+}

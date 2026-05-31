@@ -1,0 +1,70 @@
+default_platform(:android)
+
+# Shared
+before_all do
+  ensure_env_vars(env_vars: ["FLUTTER_BUILD_NUMBER"])
+end
+
+# ── ANDROID ──────────────────────────────────────────────────────────────────
+platform :android do
+  desc "Build and upload to Play Store internal track"
+  lane :internal do
+    sh("flutter build appbundle --release \
+      --build-number=#{ENV['FLUTTER_BUILD_NUMBER']} \
+      --dart-define=ENV=production \
+      --dart-define=SUPABASE_URL=#{ENV['SUPABASE_URL']} \
+      --dart-define=SUPABASE_ANON_KEY=#{ENV['SUPABASE_ANON_KEY']}")
+    upload_to_play_store(
+      track: "internal",
+      aab: "build/app/outputs/bundle/release/app-release.aab",
+      json_key_data: ENV["PLAY_STORE_JSON_KEY"],
+      skip_upload_screenshots: true,
+      skip_upload_images: true
+    )
+  end
+
+  desc "Promote internal → production"
+  lane :promote_prod do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      json_key_data: ENV["PLAY_STORE_JSON_KEY"],
+      rollout: "0.1"
+    )
+  end
+end
+
+# ── IOS ───────────────────────────────────────────────────────────────────────
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    setup_ci if ENV["CI"]
+    match(
+      type: "appstore",
+      readonly: is_ci,
+      git_url: ENV["MATCH_GIT_URL"],
+      app_identifier: ENV["APP_BUNDLE_ID"]
+    )
+    sh("flutter build ipa --release \
+      --build-number=#{ENV['FLUTTER_BUILD_NUMBER']} \
+      --dart-define=ENV=production \
+      --dart-define=SUPABASE_URL=#{ENV['SUPABASE_URL']} \
+      --dart-define=SUPABASE_ANON_KEY=#{ENV['SUPABASE_ANON_KEY']}")
+    upload_to_testflight(
+      ipa: "build/ios/ipa/*.ipa",
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Promote TestFlight → App Store"
+  lane :promote_prod do
+    deliver(
+      submit_for_review: true,
+      automatic_release: false,
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_screenshots: true,
+      skip_metadata: false
+    )
+  end
+end

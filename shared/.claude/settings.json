@@ -1,0 +1,47 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Read",
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/block-dangerous.sh" },
+          { "type": "command", "command": "bash .claude/hooks/rtk-rewrite.sh" },
+          { "type": "command", "command": "bash .claude/hooks/context-guard.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/auto-format.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/verify-on-stop.sh" }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(flutter:*)", "Bash(dart:*)", "Bash(cargo:*)",
+      "Bash(npm:*)", "Bash(npx:*)", "Bash(node:*)",
+      "Bash(python:*)", "Bash(pip:*)", "Bash(pytest:*)",
+      "Bash(git:*)", "Bash(docker:*)", "Bash(docker-compose:*)",
+      "Bash(cat:*)", "Bash(grep:*)", "Bash(find:*)",
+      "Bash(ls:*)", "Bash(echo:*)", "Bash(mkdir:*)", "Bash(cp:*)", "Bash(mv:*)",
+      "Bash(gitleaks:*)", "Bash(fastlane:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(git push --force)",
+      "Bash(git push -f)",
+      "Bash(DROP TABLE*)",
+      "Bash(DELETE FROM * WHERE 1=1*)"
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+# Full dev stack — adapt env vars for your project
+# Usage: docker-compose up -d
+
+version: '3.9'
+
+services:
+  app:
+    build: { context: ., dockerfile: Dockerfile }
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/appdb
+      REDIS_URL: redis://redis:6379
+    ports: ['3000:3000']
+    depends_on: { db: { condition: service_healthy }, redis: { condition: service_started } }
+    volumes: [.:/app, /app/node_modules]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_DB: appdb, POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres }
+    ports: ['5432:5432']
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s; timeout: 5s; retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on: [app]
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes: ['./devops/prometheus.yml:/etc/prometheus/prometheus.yml']
+    ports: ['9090:9090']
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ['3001:3000']
+    environment: { GF_SECURITY_ADMIN_PASSWORD: admin }
+    volumes: [grafana_data:/var/lib/grafana]
+
+volumes: { pgdata: {}, grafana_data: {} }
