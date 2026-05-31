@@ -90,7 +90,7 @@ This is the real long-term value. After 20 real sessions, your MEMORY.md is a pr
 
 ```bash
 # 1. Clone this repo
-git clone https://github.com/YOUR_USERNAME/ai-software-firm.git
+git clone https://github.com/AbuBakarPial/ai-software-firm.git
 
 # 2. Copy into your project
 cd your-flutter-project
